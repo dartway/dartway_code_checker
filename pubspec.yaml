@@ -1,0 +1,18 @@
+name: dartway_code_checker
+description: DartWay.dev code checker showing errors and warning from the Dart Way application design principles.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.7.2
+
+executables:
+  check_flutter_app: bin/check_flutter_app.dart
+
+# Add regular dependencies here.
+dependencies:
+  # path: ^1.8.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
