@@ -46,12 +46,11 @@ class DwFlutterInspector {
     }
 
     dirPath = argsDirPath;
-    activeTypes =
-        DwFlutterCheckType.values.where((t) {
-          if (filterType != null) return t == filterType;
-          if (filterSeverity != null) return t.severity == filterSeverity;
-          return true;
-        }).toSet();
+    activeTypes = DwFlutterCheckType.values.where((t) {
+      if (filterType != null) return t == filterType;
+      if (filterSeverity != null) return t.severity == filterSeverity;
+      return true;
+    }).toSet();
   }
 
   Future<void> run() async {
@@ -115,10 +114,7 @@ class DwFlutterInspector {
     final uiKitDir = Directory('lib/ui_kit');
     if (!uiKitDir.existsSync()) return;
 
-    final files = uiKitDir
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where(
+    final files = uiKitDir.listSync(recursive: true).whereType<File>().where(
           (f) => f.path.endsWith('.dart') && !f.path.endsWith('ui_kit.dart'),
         );
 
@@ -145,8 +141,7 @@ class DwFlutterInspector {
             final value = match.group(1);
 
             // Игнорируем строки, которые похожи на пути, переводы, переменные и т.п.
-            final isException =
-                value == null ||
+            final isException = value == null ||
                 value.contains(RegExp(r'\.svg$|\.png$|\.dart$|\.json$')) ||
                 value.startsWith('../') ||
                 value.startsWith(r'$') ||
@@ -208,14 +203,13 @@ class DwFlutterInspector {
     final libDir = Directory('lib');
     if (!libDir.existsSync()) return;
 
-    final rootDirs =
-        libDir.listSync().whereType<Directory>().where((d) {
-          final name = d.path.split(Platform.pathSeparator).last;
-          return name.startsWith('app') ||
-              name.startsWith('auth') ||
-              name.startsWith('common') ||
-              name.startsWith('admin');
-        }).toList();
+    final rootDirs = libDir.listSync().whereType<Directory>().where((d) {
+      final name = d.path.split(Platform.pathSeparator).last;
+      return name.startsWith('app') ||
+          name.startsWith('auth') ||
+          name.startsWith('common') ||
+          name.startsWith('admin');
+    }).toList();
 
     for (final dir in rootDirs) {
       await _validateFeatureRecursively(dir, errors, stats, activeTypes);
@@ -233,12 +227,11 @@ class DwFlutterInspector {
         pathParts.isNotEmpty ? pathParts.lastWhere((e) => e.isNotEmpty) : '';
 
     if (name == 'state' || name == 'widgets') {
-      final dartFiles =
-          dir
-              .listSync(recursive: true)
-              .whereType<File>()
-              .where((f) => f.path.endsWith('.dart'))
-              .toList();
+      final dartFiles = dir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .toList();
 
       for (final file in dartFiles) {
         final content = await file.readAsString();
@@ -248,11 +241,10 @@ class DwFlutterInspector {
     }
 
     final entries = dir.listSync();
-    final rootDartFiles =
-        entries
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.dart'))
-            .toList();
+    final rootDartFiles = entries
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))
+        .toList();
     final subDirs = entries.whereType<Directory>().toList();
 
     if (activeTypes.contains(DwFlutterCheckType.invalidFeatureStructure)) {
@@ -264,15 +256,14 @@ class DwFlutterInspector {
           stats,
         );
       } else if (rootDartFiles.length == 1) {
-        final invalidSubfolders =
-            subDirs
-                .map(
-                  (d) => d.path
-                      .split(Platform.pathSeparator)
-                      .lastWhere((e) => e.isNotEmpty),
-                )
-                .where((n) => n != 'widgets' && n != 'state')
-                .toList();
+        final invalidSubfolders = subDirs
+            .map(
+              (d) => d.path
+                  .split(Platform.pathSeparator)
+                  .lastWhere((e) => e.isNotEmpty),
+            )
+            .where((n) => n != 'widgets' && n != 'state')
+            .toList();
 
         if (invalidSubfolders.isNotEmpty) {
           report(
@@ -302,6 +293,24 @@ class DwFlutterInspector {
     Map<DwFlutterCheckType, int> stats,
     Set<DwFlutterCheckType> activeTypes,
   ) {
+    const maxLines = 150;
+
+    if (filePath.endsWith('.g.dart') || filePath.endsWith('.freezed.dart')) {
+      return; // пропускаем автогенерируемые файлы
+    }
+
+    if (activeTypes.contains(DwFlutterCheckType.fileTooLong)) {
+      final lines = content.split('\n');
+      if (lines.length > maxLines) {
+        report(
+          DwFlutterCheckType.fileTooLong,
+          '$filePath is too long - ${lines.length} lines (recommended max is $maxLines))',
+          errors,
+          stats,
+        );
+      }
+    }
+
     if (activeTypes.contains(DwFlutterCheckType.forbiddenUiUsage)) {
       final forbiddenPatterns = {
         'Color(': 'Color',
@@ -309,6 +318,7 @@ class DwFlutterInspector {
         'BorderRadius.': 'BorderRadius',
         'context.textTheme': 'context.textTheme',
         'context.colorTheme': 'context.colorTheme',
+        'context.colorScheme': 'context.colorScheme',
       };
 
       for (final entry in forbiddenPatterns.entries) {
