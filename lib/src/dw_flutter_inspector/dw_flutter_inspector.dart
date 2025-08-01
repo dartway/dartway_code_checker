@@ -121,14 +121,29 @@ class DwFlutterInspector {
     for (final file in files) {
       final content = await file.readAsString();
       if (activeTypes.contains(DwFlutterCheckType.uiKitContainsText)) {
-        if (!content.contains("part of '../ui_kit.dart';")) {
+// const regex = /part of ['"](\.\.\/)+ui_kit.dart['"];/gm;
+
+        // Проверяем наличие директивы "part of ../ui_kit.dart"
+        // Используем RegExp для проверки с учётом возможных кавычек и путей
+        final regex = RegExp(r"part of [\x22\x27](../)+ui_kit.dart[\x22\x27];");
+
+        if (!regex.hasMatch(content)) {
           report(
             DwFlutterCheckType.uiKitPartMissing,
-            'File ${file.path} in ui_kit does not contain "part of" directive',
+            'File ${file.path} in ui_kit does not contain "part of ../ui_kit.dart" directive',
             errors,
             stats,
           );
         }
+
+        // if (!content.contains("part of '../ui_kit.dart';")) {
+        //   report(
+        //     DwFlutterCheckType.uiKitPartMissing,
+        //     'File ${file.path} in ui_kit does not contain "part of" directive',
+        //     errors,
+        //     stats,
+        //   );
+        // }
       }
 
       if (activeTypes.contains(DwFlutterCheckType.uiKitContainsText)) {

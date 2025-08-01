@@ -8,6 +8,7 @@ environment:
 
 executables:
   check_flutter_app: bin/check_flutter_app.dart
+  calculate_flutter_app_stats: bin/calculate_flutter_app_stats.dart
 
 # Add regular dependencies here.
 dependencies:
