@@ -2,12 +2,11 @@ enum DwFlutterCheckSeverity { info, warning, error }
 
 enum DwFlutterCheckType {
   uiKitPartMissing,
-  uiKitContainsText, // Новая проверка
+  uiKitContainsText,
   forbiddenUiUsage,
   forbiddenUiKitImport,
   invalidFeatureStructure,
   fileTooLong,
-
   forbiddenFeatureImport;
 
   DwFlutterCheckSeverity get severity => switch (this) {

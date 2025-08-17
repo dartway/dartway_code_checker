@@ -241,7 +241,7 @@ class DwFlutterInspector {
     final name =
         pathParts.isNotEmpty ? pathParts.lastWhere((e) => e.isNotEmpty) : '';
 
-    if (name == 'state' || name == 'widgets') {
+    if (name == 'logic' || name == 'widgets') {
       final dartFiles = dir
           .listSync(recursive: true)
           .whereType<File>()
@@ -277,7 +277,7 @@ class DwFlutterInspector {
                   .split(Platform.pathSeparator)
                   .lastWhere((e) => e.isNotEmpty),
             )
-            .where((n) => n != 'widgets' && n != 'state')
+            .where((n) => n != 'widgets' && n != 'logic')
             .toList();
 
         if (invalidSubfolders.isNotEmpty) {
@@ -368,7 +368,7 @@ class DwFlutterInspector {
 
     if (activeTypes.contains(DwFlutterCheckType.forbiddenFeatureImport)) {
       final forbiddenImportPattern = RegExp(
-        r"import\s+'package:[^']*/(app|auth|common)/([^/]+)/(widgets|state)/",
+        r"import\s+'package:[^']*/(app|auth|common)/([^/]+)/(widgets|logic)/",
       );
 
       // Определяем имя фичи текущего файла
@@ -376,7 +376,7 @@ class DwFlutterInspector {
       String? currentFeature;
       for (int i = parts.length - 1; i >= 2; i--) {
         final part = parts[i];
-        if (part == 'widgets' || part == 'state') {
+        if (part == 'widgets' || part == 'logic') {
           currentFeature = parts[i - 1];
           break;
         }
